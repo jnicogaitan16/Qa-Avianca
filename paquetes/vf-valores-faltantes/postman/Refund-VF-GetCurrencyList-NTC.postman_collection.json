@@ -1,0 +1,145 @@
+{
+  "info": {
+    "name": "Refund VF — GetCurrencyList + NTC",
+    "description": "Solo requests con contrato en manuales. Radicar/aprobar VF son UI. sendgridPath vacío hasta swagger AVR. Campo notifaction-type: así está en el manual.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "00-Setup",
+      "item": [
+        {
+          "name": "GET GetCurrencyList (PI external)",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": "{{piExtUrl}}/api/GetCurrencyList"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 2xx', function () {",
+                  "  pm.expect(pm.response.code).to.be.within(200, 299);",
+                  "});",
+                  "pm.test('Items exponen currency-code', function () {",
+                  "  const json = pm.response.json();",
+                  "  const list = Array.isArray(json) ? json : (json.data || json);",
+                  "  pm.expect(list).to.be.an('array').that.is.not.empty;",
+                  "  pm.expect(list[0]).to.have.property('currency-code');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET GetCurrencyList (APIM QA)",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": "{{apimQa}}/API_Refund_PIC/api/GetCurrencyList"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 2xx', function () {",
+                  "  pm.expect(pm.response.code).to.be.within(200, 299);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "05-NTC AVR",
+      "item": [
+        {
+          "name": "POST NTC23 pago VF voucher KR",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{authToken}}" }
+            ],
+            "url": "{{avrExtUrl}}/{{sendgridPath}}",
+            "description": "Path no documentado. Rellenar sendgridPath. La solicitud debe existir en AVR. Body: manual AVR §10.4.2",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"notifaction-type\": \"NTC23\",\n  \"language\": \"ES\",\n  \"refund-request\": \"{{refundRequest}}\",\n  \"refund-status\": \"G7\",\n  \"refund-reject-reason\": \"\",\n  \"pnr\": \"{{pnr}}\",\n  \"owner-first-name\": \"Diego\",\n  \"owner-middle-name\": \"\",\n  \"owner-last-name\": \"test\",\n  \"owner-middle-last-name\": \"\",\n  \"frequent-flyer-num\": \"\",\n  \"email-reservation\": \"{{email}}\",\n  \"subchannel\": \"\",\n  \"info-tkt\": [\n    {\n      \"document\": \"1342153984574\",\n      \"document-type\": \"T\",\n      \"fare-amount\": 850000.00,\n      \"fare-currency\": \"COP\",\n      \"refcal-fare-amount\": 234000.00,\n      \"refcal-currency\": \"COP\",\n      \"penalty\": 0,\n      \"doc-refund-status\": \"\",\n      \"doc-refund-reject-reason\": \"\",\n      \"info-taxes\": [\n        {\n          \"tax-code\": \"\",\n          \"tax-amount\": 0,\n          \"tax-currency\": \"\",\n          \"refcal-tax-amount\": 0,\n          \"refcal-tax-currency\": \"\",\n          \"refundable-tax-indicator\": \"\"\n        }\n      ],\n      \"payment-detail\": {\n        \"payment-date\": \"2026-07-01\",\n        \"fop\": \"KR\",\n        \"card-num\": \"\",\n        \"bank-acount\": \"\",\n        \"voucher-num\": \"1500014149489715\",\n        \"voucher-issue-date\": \"2026-07-01\",\n        \"voucher-exp-date\": \"\",\n        \"voucher-cpg\": \"AV Refund/DOT Law PF\",\n        \"acm-num\": \"\",\n        \"miles\": \"0\",\n        \"doc-ref-original\": \"\",\n        \"ip\": \"\"\n      }\n    }\n  ],\n  \"total-refund-amount\": 384000.00,\n  \"total-refund-currency\": \"COP\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "if (!pm.environment.get('sendgridPath')) {",
+                  "  throw new Error('sendgridPath vacío: no inventar path. Completar desde swagger AVR SendgridEndpoints.');",
+                  "}"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 2xx', function () {",
+                  "  pm.expect(pm.response.code).to.be.within(200, 299);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST NTC24 pago VF ACM NC",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{authToken}}" }
+            ],
+            "url": "{{avrExtUrl}}/{{sendgridPath}}",
+            "description": "Body: manual AVR §10.4.3. acm-num poblado; fop NC.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"notifaction-type\": \"NTC24\",\n  \"language\": \"ES\",\n  \"refund-request\": \"{{refundRequest}}\",\n  \"refund-status\": \"G7\",\n  \"refund-reject-reason\": \"\",\n  \"pnr\": \"{{pnr}}\",\n  \"owner-first-name\": \"Jenny\",\n  \"owner-middle-name\": \"\",\n  \"owner-last-name\": \"Quintero\",\n  \"owner-middle-last-name\": \"\",\n  \"frequent-flyer-num\": \"\",\n  \"email-reservation\": \"{{email}}\",\n  \"subchannel\": \"\",\n  \"info-tkt\": [\n    {\n      \"document\": \"1342441242124\",\n      \"document-type\": \"T\",\n      \"fare-amount\": 2097560.00,\n      \"fare-currency\": \"COP\",\n      \"refcal-fare-amount\": 88000.00,\n      \"refcal-currency\": \"COP\",\n      \"penalty\": 0,\n      \"doc-refund-status\": \"C\",\n      \"doc-refund-reject-reason\": \"\",\n      \"info-taxes\": [\n        {\n          \"tax-code\": \"\",\n          \"tax-amount\": 0,\n          \"tax-currency\": \"\",\n          \"refcal-tax-amount\": 0,\n          \"refcal-tax-currency\": \"\",\n          \"refundable-tax-indicator\": \"\"\n        }\n      ],\n      \"payment-detail\": {\n        \"payment-date\": \"2026-04-01\",\n        \"fop\": \"NC\",\n        \"card-num\": \"\",\n        \"bank-acount\": \"\",\n        \"voucher-num\": \"\",\n        \"voucher-issue-date\": \"2026-04-01\",\n        \"voucher-exp-date\": \"\",\n        \"voucher-cpg\": \"\",\n        \"acm-num\": \"100001\",\n        \"miles\": \"0\",\n        \"doc-ref-original\": \"\",\n        \"ip\": \"\"\n      }\n    }\n  ],\n  \"total-refund-amount\": 88000.00,\n  \"total-refund-currency\": \"COP\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "if (!pm.environment.get('sendgridPath')) {",
+                  "  throw new Error('sendgridPath vacío: no inventar path. Completar desde swagger AVR SendgridEndpoints.');",
+                  "}"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 2xx', function () {",
+                  "  pm.expect(pm.response.code).to.be.within(200, 299);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
