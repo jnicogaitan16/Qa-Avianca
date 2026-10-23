@@ -1,0 +1,4 @@
+# Dependencia opcional del lector de Work Items.
+# Se instala solo si QA_INSTALL_DEPS=true (scripts/install_deps.py).
+# PDF textual. DOCX, XLSX, CSV, TXT y MD se leen con la biblioteca estándar.
+pypdf==5.4.0

@@ -2,5 +2,11 @@
 __pycache__/
 *.pyc
 .env
+outputs/
+outputs-test-tmp/
+test-cases/
 .DS_Store
+Thumbs.db
 .claude/
+.cursor/
+.~lock*

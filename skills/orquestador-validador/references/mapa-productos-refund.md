@@ -33,6 +33,7 @@ ROR: maestras / homologaciones / EMD → APIM → orquestadores (SR, AVR, PI, Mo
 | Flujo VF extremo a extremo | `qa-funcional` + `postman` + `db-relacional` + manuales SR y PI |
 | Maestra EMD / ListHomologation / EmdGetRfisc | `postman` + `db-relacional` + manual ROR |
 | Inactivación de usuario ROR | `db-relacional` + manual ROR (`ROR_DEACTIVITY_USER`) |
+| Log de capa media, campos, arrays, saltos request/response | `validador-logs-capa-media` + el PBI en `test-cases/` si lo nombran |
 
 ## Contradicciones conocidas
 
